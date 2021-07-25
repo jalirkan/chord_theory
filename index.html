@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Music Theory Quiz</h1>
+
+    <div class="p-2">
+      <form
+        onsubmit="return handleData()"
+        method="post"
+        action="https://postman-echo.com/post"
+      >
+        <p>Select chord root notes:</p>
+        <div>
+          <input type="checkbox" name="roots" id="roots_a" value="A" checked />
+          <label for="roots_a">A</label>
+        </div>
+        <div>
+          <input type="checkbox" name="roots" id="roots_b" value="B" />
+          <label for="roots_b">B</label>
+        </div>
+        <div>
+          <input type="checkbox" name="roots" id="roots_c" value="C" checked />
+          <label for="roots_c">C</label>
+        </div>
+        <div>
+          <input type="checkbox" name="roots" id="roots_d" value="D" />
+          <label for="roots_d">D</label>
+        </div>
+        <div>
+          <input type="checkbox" name="roots" id="roots_e" value="E" />
+          <label for="roots_e">E</label>
+        </div>
+        <div>
+          <input type="checkbox" name="roots" id="roots_f" value="F" />
+          <label for="roots_f">F</label>
+        </div>
+        <div>
+          <input type="checkbox" name="roots" id="roots_g" value="G" />
+          <label for="roots_g">G</label>
+        </div>
+
+        <div>
+          <input
+            type="checkbox"
+            name="triad-types"
+            id="major"
+            value="Major"
+            checked
+          />
+          <label for="major">Major</label>
+        </div>
+        <div>
+          <input type="checkbox" name="triad-types" id="minor" value="Minor" />
+          <label for="minor">Minor</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            name="triad-types"
+            id="dim"
+            value="Diminished"
+            checked
+          />
+          <label for="dim">Diminished</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            name="triad-types"
+            id="aug"
+            value="Augmented"
+          />
+          <label for="aug">Augmented</label>
+        </div>
+
+        <div>
+          <input type="submit" name="submit" value="Submit" />
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
