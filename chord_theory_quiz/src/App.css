@@ -1,0 +1,33 @@
+* {
+  box-sizing: border-box;
+}
+
+p {
+  margin-top: 5%;
+  margin-bottom: 5%;
+}
+
+.titles {
+  column-count: 4;
+}
+
+.roots {
+  columns: 300px 1;
+}
+
+.sharps {
+  columns: 300px 1;
+}
+
+.flats {
+  columns: 300px 1;
+}
+
+.triads {
+  columns: 300px 1;
+}
+
+.categories {
+  column-count: 4;
+  column-fill: 7;
+}
