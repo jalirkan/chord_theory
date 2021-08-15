@@ -1,4 +1,4 @@
-import "../Styles/quiz.css";
+
 
 function Quiz() {
   return (
