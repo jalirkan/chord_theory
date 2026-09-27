@@ -3,6 +3,7 @@ import {
   CHORD_TYPES,
   CIRCLE,
   chordSymbol,
+  DEGREE_NAMES,
   diatonicChord,
   MAJOR_DIATONIC,
   MAJOR_DIATONIC_SEVENTHS,
@@ -56,8 +57,9 @@ export const harmony = {
       const { numeral, type } = MAJOR_DIATONIC[degree - 1];
       const choice = (t) => ({ id: t, label: CHORD_TYPES[t].name });
       return {
-        prompt: "In any major key, this chord is",
-        subject: numeral,
+        prompt: "In any major key, the triad built on",
+        subject: `degree ${degree}`,
+        caption: `the ${DEGREE_NAMES[degree - 1]}`,
         explain: `Major keys run I ii iii IV V vi vii°, so ${numeral} is always ${CHORD_TYPES[type].name}.`,
         ...finalize(rng, choice(type), shuffle(rng, TRIAD_TYPES.filter((t) => t !== type)).map(choice)),
       };

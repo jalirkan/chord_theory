@@ -5,9 +5,11 @@ import {
   INTERVALS,
   intervalBetween,
   LETTERS,
+  halfSteps,
   noteKey,
   noteName,
   parseNote,
+  withArticle,
 } from "../../theory/index.js";
 import { makeCard } from "../cards.js";
 import { finalize, noteChoice, noteDistractors } from "../choices.js";
@@ -19,8 +21,10 @@ function explain(root, top, code) {
   const iv = INTERVALS[code];
   const start = LETTERS.indexOf(root.letter);
   const letters = Array.from({ length: iv.steps + 1 }, (_, i) => LETTERS[(start + i) % 7]);
-  return `${noteName(root)} up to ${noteName(top)} spans ${letters.length} letter names (${letters.join(" ")}) and ${iv.semis} half steps: a ${iv.name}.`;
+  return `${noteName(root)} up to ${noteName(top)} spans ${letters.length} letter names (${letters.join(" ")}) and ${halfSteps(iv.semis)}: ${withArticle(iv.name)}.`;
 }
+
+const capitalize = (s) => s[0].toUpperCase() + s.slice(1);
 
 /**
  * Wrong interval names that sound or look close: same number, same size or a
@@ -85,7 +89,7 @@ export const intervals = {
     if (card.kind === "above") {
       return {
         ...base,
-        prompt: `A ${INTERVALS[code].name} above`,
+        prompt: `${capitalize(withArticle(INTERVALS[code].name))} above`,
         subject: noteName(root),
         spell: { notes: [noteKey(top)] },
         ...finalize(rng, noteChoice(top), noteDistractors(rng, top).map(noteChoice)),

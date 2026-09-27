@@ -111,7 +111,7 @@ export default function Progress() {
         <section>
           <div className="section-head">
             <h2>Mastery</h2>
-            <p>A card counts as mastered once it survives a week-long gap.</p>
+            <p>Mastery climbs each time a card survives a longer gap: 1, 3, 7, 16, then 35 days.</p>
           </div>
           <ul className="mastery-list">
             {DECKS.map((d) => {

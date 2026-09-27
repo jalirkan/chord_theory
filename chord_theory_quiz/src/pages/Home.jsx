@@ -5,10 +5,11 @@ import { dateKey, streak } from "../store/progress.js";
 import { useProgress } from "../store/ProgressContext.jsx";
 import { deckStats, totalDue } from "../store/stats.js";
 
-export function Marks({ marks }) {
+export function Marks({ marks, total = marks.length }) {
+  const cells = Array.from({ length: total }, (_, i) => marks[i] ?? 0);
   return (
-    <span className="marks" role="img" aria-label={`${marks.filter(Boolean).length} of ${marks.length} right`}>
-      {marks.map((m, i) => (
+    <span className="marks" role="img" aria-label={`${marks.filter(Boolean).length} of ${total} right`}>
+      {cells.map((m, i) => (
         <i key={i} className={m ? "hit" : ""} />
       ))}
     </span>
@@ -73,7 +74,13 @@ export default function Home() {
               <br />
               <span className="label">{daily ? `${daily.score} of ${daily.total} right` : "Not played yet"}</span>
             </span>
-            {daily ? <Marks marks={daily.marks} /> : <Link className="btn" to="/play/daily/today">Play</Link>}
+            {daily ? (
+              <Marks marks={daily.marks} total={daily.total} />
+            ) : (
+              <Link className="btn" to="/play/daily/today">
+                Play
+              </Link>
+            )}
           </div>
           <div className="today-row">
             <span>

@@ -5,7 +5,6 @@
 const DAY = 24 * 60 * 60 * 1000;
 export const BOX_INTERVALS = [0, 1 * DAY, 3 * DAY, 7 * DAY, 16 * DAY, 35 * DAY];
 export const MAX_BOX = BOX_INTERVALS.length - 1;
-export const MASTERED_BOX = 3;
 
 export function newCardState() {
   return { box: 0, due: 0, seen: 0, right: 0, last: 0 };

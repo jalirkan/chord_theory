@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyAnswer,
+  applyDaily,
   applySession,
   emptyProgress,
   normalize,
@@ -24,11 +25,17 @@ export function ProgressProvider({ children }) {
     setProgress((p) => applyAnswer(p, cardId, correct));
   }, []);
 
+  // Returns whether this was a new best (for the results screen) right away,
+  // while the save itself goes through the updater so no pending change is lost.
   const finishSession = useCallback((session) => {
     const result = applySession(latest.current, session);
     latest.current = result.progress;
-    setProgress(result.progress);
-    return result;
+    setProgress((p) => applySession(p, session).progress);
+    return { isBest: result.isBest, previous: result.previous };
+  }, []);
+
+  const recordDaily = useCallback((date, result) => {
+    setProgress((p) => applyDaily(p, date, result));
   }, []);
 
   const setSetting = useCallback((key, value) => {
@@ -38,8 +45,8 @@ export function ProgressProvider({ children }) {
   const reset = useCallback(() => setProgress(emptyProgress()), []);
 
   const value = useMemo(
-    () => ({ progress, answer, finishSession, setSetting, reset }),
-    [progress, answer, finishSession, setSetting, reset]
+    () => ({ progress, answer, finishSession, recordDaily, setSetting, reset }),
+    [progress, answer, finishSession, recordDaily, setSetting, reset]
   );
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }

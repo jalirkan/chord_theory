@@ -6,3 +6,6 @@ afterEach(() => {
   cleanup();
   localStorage.clear();
 });
+
+// jsdom doesn't implement scrolling; the app scrolls to the top on navigation.
+window.scrollTo = () => {};

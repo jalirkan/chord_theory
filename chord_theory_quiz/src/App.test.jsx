@@ -56,15 +56,15 @@ describe("deck page", () => {
 });
 
 describe("playing", () => {
-  it("answers with the number keys, shows feedback and saves progress", async () => {
+  it("answers with the number keys and saves progress", async () => {
     const user = userEvent.setup();
     renderAt("/play/review/triads");
     await user.click(screen.getByRole("button", { name: /Start/ }));
     expect(answerButtons()).toHaveLength(4);
 
+    // Correct answers move on by themselves after a moment, so check what was
+    // saved rather than the feedback on screen (that is covered by Spell It).
     await user.keyboard("1");
-    expect(await screen.findByText(/^(Correct|Not quite)$/)).toBeInTheDocument();
-    expect(answerButtons().every((b) => b.disabled)).toBe(true);
     expect(saved().totals.answered).toBe(1);
     expect(Object.keys(saved().cards)[0]).toMatch(/^triads\//);
   });
@@ -83,6 +83,38 @@ describe("playing", () => {
     await user.keyboard("{Enter}");
     expect(await screen.findByText("Correct")).toBeInTheDocument();
     expect(saved().totals.correct).toBe(1);
+  });
+
+  it("marks a repeated note right only once in Spell It", async () => {
+    const user = userEvent.setup();
+    renderAt("/play/spell/triads");
+    await user.click(screen.getByRole("button", { name: /Start/ }));
+    const root = document.querySelector(".prompt-subject").textContent.split(" ")[0];
+    await user.keyboard(keysFor([root, root, root]));
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText("Not quite")).toBeInTheDocument();
+    expect(document.querySelectorAll(".slot.is-ok")).toHaveLength(1);
+    expect(document.querySelectorAll(".slot.is-bad")).toHaveLength(2);
+  });
+
+  it("counts a Daily 10 you quit halfway as today's attempt", async () => {
+    const user = userEvent.setup();
+    const first = renderAt("/play/daily/today");
+    await user.click(screen.getByRole("button", { name: /Start/ }));
+    for (let i = 0; i < 3; i++) {
+      await user.keyboard("1");
+      await user.keyboard("{Enter}");
+    }
+    first.unmount();
+    const [entry] = Object.values(saved().daily);
+    expect(entry.total).toBe(10);
+    expect(entry.marks).toHaveLength(3);
+
+    // A second run is practice: it must not replace the first attempt.
+    renderAt("/play/daily/today");
+    await user.click(screen.getByRole("button", { name: /Start/ }));
+    await user.keyboard("2");
+    expect(Object.values(saved().daily)[0]).toEqual(entry);
   });
 
   it("finishes the Daily 10 and records the first attempt", async () => {

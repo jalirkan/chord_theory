@@ -1,6 +1,6 @@
 import { DECKS, deckCards, questionFor } from "../quiz/decks/index.js";
 import { seededRng } from "../quiz/rng.js";
-import { dueCount, mastery, MASTERED_BOX } from "../quiz/srs.js";
+import { dueCount, mastery } from "../quiz/srs.js";
 
 const idCache = new Map();
 
@@ -12,17 +12,10 @@ export function deckCardIds(deckId) {
 
 export function deckStats(deckId, states, now = Date.now()) {
   const ids = deckCardIds(deckId);
-  let seen = 0;
-  let mastered = 0;
-  for (const id of ids) {
-    const s = states[id];
-    if (s?.seen) seen++;
-    if ((s?.box ?? 0) >= MASTERED_BOX) mastered++;
-  }
+  const seen = ids.filter((id) => states[id]?.seen).length;
   return {
     total: ids.length,
     seen,
-    mastered,
     mastery: mastery(ids, states),
     due: dueCount(ids, states, now),
   };

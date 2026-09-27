@@ -4,9 +4,11 @@ import {
   CHORD_TYPES,
   chordSymbol,
   CORE_INTERVALS,
+  halfSteps,
   INTERVALS,
   noteKey,
   noteName,
+  withArticle,
 } from "../../theory/index.js";
 import { makeCard } from "../cards.js";
 import { finalize, notesLabel } from "../choices.js";
@@ -51,7 +53,7 @@ export const earIntervals = {
   defaultOptions: { codes: CORE_INTERVALS },
   rules: CORE_INTERVALS.map((c) => ({
     term: intervalLabel(c),
-    value: `${INTERVALS[c].semis} half steps`,
+    value: halfSteps(INTERVALS[c].semis),
     note: INTERVAL_SONGS[c],
   })),
 
@@ -71,7 +73,7 @@ export const earIntervals = {
       subject: null,
       audio: { notes: [root, noteKey(top)], style: "interval" },
       reveal: [root, noteKey(top)],
-      explain: `${noteName(root)} up to ${noteName(top)}: ${INTERVALS[code].semis} half steps, a ${intervalLabel(code)}. Think “${INTERVAL_SONGS[code]}”.`,
+      explain: `${noteName(root)} up to ${noteName(top)}: ${halfSteps(INTERVALS[code].semis)}, ${withArticle(intervalLabel(code))}. Think “${INTERVAL_SONGS[code]}”.`,
       ...finalize(rng, choice(code), shuffle(rng, near).map(choice)),
     };
   },
@@ -124,7 +126,7 @@ export const earChords = {
       subject: null,
       audio: { notes: notes.map(noteKey), style: "chord" },
       reveal: notes.map(noteKey),
-      explain: `That was ${chordSymbol(root, type)} (${notesLabel(notes)}), a ${CHORD_TYPES[type].name} chord: ${CHORD_COLOURS[type]}.`,
+      explain: `That was ${chordSymbol(root, type)} (${notesLabel(notes)}), ${withArticle(CHORD_TYPES[type].name)} chord: ${CHORD_COLOURS[type]}.`,
       ...finalize(rng, choice(type), [...shuffle(rng, sameSize), ...shuffle(rng, otherSize)].map(choice)),
     };
   },

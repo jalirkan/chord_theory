@@ -73,6 +73,15 @@ export function intervalBetween(a, b) {
   return { code: known ? known[0] : code, name, steps, semis };
 }
 
+/** "a major 3rd", "an augmented 4th", "an octave". */
+export function withArticle(name) {
+  return /^[aeio]/i.test(name) ? `an ${name}` : `a ${name}`;
+}
+
+export function halfSteps(n) {
+  return `${n} half ${n === 1 ? "step" : "steps"}`;
+}
+
 export function intervalName(code) {
   return INTERVALS[code]?.name ?? code;
 }

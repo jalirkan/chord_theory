@@ -5,6 +5,7 @@ import { toMidiAscending } from "../theory/index.js";
 
 let ctx = null;
 let master = null;
+let voices = []; // { env, oscs, end } for everything still sounding
 
 function audio() {
   if (ctx) return ctx;
@@ -37,6 +38,23 @@ const PARTIALS = [
   [4, 0.035, "sine"],
 ];
 
+/** Quickly fade out anything still ringing so sounds never pile up. */
+function silence(ac) {
+  const now = ac.currentTime;
+  for (const v of voices) {
+    if (v.end <= now) continue;
+    const g = v.env.gain;
+    if (g.cancelAndHoldAtTime) g.cancelAndHoldAtTime(now);
+    else {
+      g.cancelScheduledValues(now);
+      g.setValueAtTime(Math.max(g.value, 0.0001), now);
+    }
+    g.exponentialRampToValueAtTime(0.0001, now + 0.04);
+    for (const o of v.oscs) o.stop(now + 0.05);
+  }
+  voices = [];
+}
+
 function tone(ac, midi, start, duration, velocity = 1) {
   const freq = 440 * 2 ** ((midi - 69) / 12);
   const env = ac.createGain();
@@ -49,6 +67,7 @@ function tone(ac, midi, start, duration, velocity = 1) {
   env.gain.exponentialRampToValueAtTime(0.18 * velocity, start + 0.25);
   env.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   env.connect(filter).connect(master);
+  const oscs = [];
   for (const [mult, gain, type] of PARTIALS) {
     const osc = ac.createOscillator();
     const g = ac.createGain();
@@ -58,7 +77,9 @@ function tone(ac, midi, start, duration, velocity = 1) {
     osc.connect(g).connect(env);
     osc.start(start);
     osc.stop(start + duration + 0.05);
+    oscs.push(osc);
   }
+  voices.push({ env, oscs, end: start + duration + 0.05 });
 }
 
 /**
@@ -72,6 +93,7 @@ export function playNotes(notes, style = "chord") {
   const ac = audio();
   if (!ac || !notes?.length) return;
   if (ac.state === "suspended") ac.resume().catch(() => {});
+  silence(ac);
   const midis = toMidiAscending(notes, 4);
   const t = ac.currentTime + 0.03;
   const soft = 1 / Math.sqrt(midis.length);

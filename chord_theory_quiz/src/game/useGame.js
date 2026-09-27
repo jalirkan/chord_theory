@@ -10,7 +10,7 @@ const TRACK_BEST = new Set(["blitz", "survival", "spell"]);
  * answer for spaced repetition, and saves the result when the game ends.
  */
 export function useGame(setup) {
-  const { progress, answer: recordAnswer, finishSession } = useProgress();
+  const { progress, answer: recordAnswer, finishSession, recordDaily } = useProgress();
   const [, rerender] = useReducer((x) => x + 1, 0);
   const [outcome, setOutcome] = useState(null);
   const gameRef = useRef(null);
@@ -37,15 +37,35 @@ export function useGame(setup) {
     playNotes(q.reveal, q.audio?.style ?? styleFor(q.reveal));
   }, [game]);
 
+  // Daily 10: only the first attempt of the day counts. It is decided at the
+  // first answer and saved after every answer, so quitting midway still counts.
+  const dailyCounts = useRef(null);
+  const dailyTaken = Boolean(progress.daily[setup.date]);
+
   /** Called after any answer or timeout. */
   const afterResolve = useCallback(() => {
-    const q = game.state.question;
-    const fb = game.state.feedback;
+    const st = game.state;
+    const q = st.question;
+    const fb = st.feedback;
     recordAnswer(q.cardId, fb.correct);
-    if (soundOn && q.reveal && !q.revealAsSet) {
+
+    if (setup.modeId === "daily") {
+      if (dailyCounts.current === null) dailyCounts.current = !dailyTaken;
+      if (dailyCounts.current) {
+        recordDaily(setup.date, {
+          score: st.correct,
+          total: game.mode.length,
+          marks: st.history.map((h) => (h.correct ? 1 : 0)),
+        });
+      }
+    }
+
+    // Ear prompts were just heard; replay them only to teach after a miss.
+    const replay = q.audio ? !fb.correct && setup.modeId !== "blitz" : true;
+    if (soundOn && replay && q.reveal && !q.revealAsSet) {
       playNotes(q.reveal, setup.modeId === "blitz" ? "block" : (q.audio?.style ?? styleFor(q.reveal)));
     }
-  }, [game, recordAnswer, soundOn, setup.modeId]);
+  }, [game, recordAnswer, recordDaily, dailyTaken, soundOn, setup.modeId, setup.date]);
 
   const start = useCallback(() => {
     unlockAudio();
@@ -100,27 +120,25 @@ export function useGame(setup) {
       setOutcome({ isBest: false, previous: null });
       return;
     }
-    const daily =
-      setup.modeId === "daily"
-        ? {
-            date: setup.date,
-            result: {
-              score: s.correct,
-              total: s.answered,
-              marks: s.history.map((h) => (h.correct ? 1 : 0)),
-            },
-          }
-        : null;
     setOutcome(
       finishSession({
         modeId: setup.modeId,
         setId: setup.setId,
         score: s.score,
-        daily,
         trackBest: TRACK_BEST.has(setup.modeId),
       })
     );
-  }, [s.phase, s.answered, s.score, s.correct, s.history, setup, finishSession]);
+  }, [s.phase, s.answered, s.score, setup, finishSession]);
 
-  return { game, state: s, outcome, start, respond, next, replayPrompt, replayAnswer };
+  return {
+    game,
+    state: s,
+    outcome,
+    dailyCounted: dailyCounts.current,
+    start,
+    respond,
+    next,
+    replayPrompt,
+    replayAnswer,
+  };
 }

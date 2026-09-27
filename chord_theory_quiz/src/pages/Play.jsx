@@ -97,7 +97,7 @@ export default function Play() {
 
   return (
     <GameSession
-      key={`${modeId}/${setId}/${location.search}/${run}`}
+      key={`${location.key}/${run}`}
       setup={setup}
       backTo={backLink(setId, location.search)}
       onRestart={() => setRun((r) => r + 1)}

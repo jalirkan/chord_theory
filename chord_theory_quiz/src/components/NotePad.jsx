@@ -55,7 +55,15 @@ export default function NotePad({ count, onSubmit, locked, expected }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [locked, add, alter, back, submit]);
 
-  const expectedSet = new Set(expected ?? []);
+  // Mark each typed note right at most as often as it appears in the answer,
+  // so "F F F" for F major shows one green slot, not three.
+  const unmatched = [...(expected ?? [])];
+  const slotOk = notes.map((n) => {
+    const i = unmatched.indexOf(noteKey(n));
+    if (i === -1) return false;
+    unmatched.splice(i, 1);
+    return true;
+  });
 
   return (
     <div className="notepad">
@@ -65,7 +73,7 @@ export default function NotePad({ count, onSubmit, locked, expected }) {
           let cls = "slot";
           if (n) cls += " is-filled";
           else if (i === notes.length && !locked) cls += " is-next";
-          if (locked && n) cls += expectedSet.has(noteKey(n)) ? " is-ok" : " is-bad";
+          if (locked && n) cls += slotOk[i] ? " is-ok" : " is-bad";
           return (
             <span key={i} className={cls} aria-label={n ? noteName(n) : `empty slot ${i + 1}`}>
               {n ? noteName(n) : ""}

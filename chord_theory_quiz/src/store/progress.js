@@ -69,18 +69,19 @@ export const bestKey = (modeId, setId) => `${modeId}:${setId}`;
  * Record a finished session. Returns the new progress and whether the score
  * beat the previous best for that mode and set.
  */
-export function applySession(p, { modeId, setId, score, daily, trackBest = true }, now = Date.now()) {
+export function applySession(p, { modeId, setId, score, trackBest = true }, now = Date.now()) {
   const key = bestKey(modeId, setId);
   const previous = trackBest ? (p.best[key]?.score ?? null) : null;
   const isBest = trackBest && score > 0 && (previous === null || score > previous);
-  let next = {
+  const next = {
     ...p,
     totals: { ...p.totals, sessions: p.totals.sessions + 1 },
     best: isBest ? { ...p.best, [key]: { score, at: now } } : p.best,
   };
-  // Only the first Daily 10 of the day counts.
-  if (daily && !p.daily[daily.date]) {
-    next = { ...next, daily: { ...next.daily, [daily.date]: daily.result } };
-  }
   return { progress: next, isBest, previous };
+}
+
+/** Save (or update) the Daily 10 result for a date. */
+export function applyDaily(p, date, result) {
+  return { ...p, daily: { ...p.daily, [date]: result } };
 }

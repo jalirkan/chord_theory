@@ -66,7 +66,8 @@ function formatMs(ms) {
 export default function GameSession({ setup, backTo, onRestart }) {
   const navigate = useNavigate();
   const { progress } = useProgress();
-  const { game, state: s, outcome, start, respond, next, replayPrompt, replayAnswer } = useGame(setup);
+  const { game, state: s, outcome, dailyCounted, start, respond, next, replayPrompt, replayAnswer } =
+    useGame(setup);
   const { mode } = game;
   const q = s.question;
   const fb = s.feedback;
@@ -191,6 +192,7 @@ export default function GameSession({ setup, backTo, onRestart }) {
 
         {s.phase === "over" && (
           <Results
+            dailyCounted={dailyCounted}
             mode={mode}
             setup={setup}
             s={s}
@@ -334,7 +336,7 @@ function Feedback({ q, fb, spellMode, lastOne, onNext, onHear }) {
   );
 }
 
-function Results({ mode, setup, s, outcome, backTo, onRestart, progress }) {
+function Results({ mode, setup, s, outcome, backTo, onRestart, progress, dailyCounted }) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(null);
   const misses = s.history.filter((h) => !h.correct);
@@ -407,8 +409,10 @@ function Results({ mode, setup, s, outcome, backTo, onRestart, progress }) {
           <pre className="miss" style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
             {shareText}
           </pre>
-          {dailyRecord && dailyRecord.marks.join("") !== s.history.map((h) => (h.correct ? 1 : 0)).join("") && (
-            <p className="set-name">Today's recorded score is your first attempt: {dailyRecord.score}/{dailyRecord.total}.</p>
+          {dailyCounted === false && dailyRecord && (
+            <p className="set-name">
+              Practice run. Today's first attempt is the one that counts: {dailyRecord.score} of {dailyRecord.total}.
+            </p>
           )}
           <div className="actions">
             <button type="button" className="btn" onClick={copyShare}>
